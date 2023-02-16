@@ -441,7 +441,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc2">
 <div id="toctitle"></div>
 <ul class="sectlevel2">
-<li><a href="#_upload_a_file_to_a_feed_through_api">Upload a file to a feed through API</a></li>
+<li><a href="#_upload_a_file_to_a_feed_through_api">Upload a file to a feed through API</a>
+<ul class="sectlevel3">
+<li><a href="#_0_check_the_feeds_to_which_you_can_contribute">0. Check the feeds to which you can contribute</a></li>
+<li><a href="#_1_create_a_link_for_file_upload">1. Create a link for file upload</a></li>
+<li><a href="#_2_send_the_file_to_the_link">2. Send the file to the link</a></li>
+<li><a href="#_3_send_the_uploaded_file_into_a_feed">3. Send the uploaded file into a feed</a></li>
+<li><a href="#_4_run_a_search_for_the_uploaded_file">4. Run a search for the uploaded file</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -478,7 +486,8 @@ This scenario is based on the result of the <a href="#Create-a-private-feed">Cre
 </div>
 </blockquote>
 </div>
-<h4 id="_0_check_the_feeds_to_which_you_can_contribute" class="float">0. Check the feeds to which you can contribute</h4>
+<div class="sect3">
+<h4 id="_0_check_the_feeds_to_which_you_can_contribute">0. Check the feeds to which you can contribute</h4>
 <div class="paragraph">
 <p>After creating a <em>feed</em>, you must make sure that you can send documents into it.
 This is achieved by placing your own unique <em>user</em> ID into the <em>feed</em>'s <code>"contributing_users"</code> array.</p>
@@ -517,7 +526,9 @@ X-Total: 1</pre>
 <p>If the response returns zero <em>feeds</em>, create a <em>feed</em> where you are a contributor.
 See the <a href="#Create-a-private-feed">Create a private feed</a> scenario for reference.</p>
 </div>
-<h4 id="_1_create_a_link_for_file_upload" class="float">1. Create a link for file upload</h4>
+</div>
+<div class="sect3">
+<h4 id="_1_create_a_link_for_file_upload">1. Create a link for file upload</h4>
 <div class="paragraph">
 <p>Before you can upload a file into the InfoNgen storage, from where it will be processed, you must receive a link for file upload.
 To do that, run the <code>POST feeds/upload</code> request.</p>
@@ -543,7 +554,9 @@ Location: https://files.infongen.com/uploads/{client_id}/{company_id}/{user_id}/
 <p>This link is instrumental in the two following steps.
 After uploading a file, you can download the uploaded document using this link.</p>
 </div>
-<h4 id="_2_send_the_file_to_the_link" class="float">2. Send the file to the link</h4>
+</div>
+<div class="sect3">
+<h4 id="_2_send_the_file_to_the_link">2. Send the file to the link</h4>
 <div class="paragraph">
 <p>Use the received link to upload the file into the InfoNgen storage.
 To do that, send the file as an attachment to a PUT request, where the address of the PUT request is the link from step 1.</p>
@@ -584,7 +597,9 @@ To do that, send the file as an attachment to a PUT request, where the address o
 <pre>HTTP/1.1 200 OK</pre>
 </div>
 </div>
-<h4 id="_3_send_the_uploaded_file_into_a_feed" class="float">3. Send the uploaded file into a feed</h4>
+</div>
+<div class="sect3">
+<h4 id="_3_send_the_uploaded_file_into_a_feed">3. Send the uploaded file into a feed</h4>
 <div class="paragraph">
 <p>After uploading the file to the link, you must append this file from the InfoNgen storage to a <em>feed</em> for processing and tagging.
 To do that, run the <code>POST feeds/{{your_feed_unique_ID}}/content</code> request with the following parameters:</p>
@@ -684,7 +699,9 @@ Content-Type: application/json</pre>
 }</code></pre>
 </div>
 </div>
-<h4 id="_4_run_a_search_for_the_uploaded_file" class="float">4. Run a search for the uploaded file</h4>
+</div>
+<div class="sect3">
+<h4 id="_4_run_a_search_for_the_uploaded_file">4. Run a search for the uploaded file</h4>
 <div class="paragraph">
 <p>To find the tagged file, run the <code>POST searches</code> request to create a <em>search</em>.
 You can use the following parameters:</p>
@@ -782,9 +799,10 @@ Content-Type: application/json</pre>
 </div>
 </div>
 </div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-02-16 11:07:18 +0300
+Last updated 2023-02-16 11:10:03 +0300
 </div>
 </div>
 </body>
