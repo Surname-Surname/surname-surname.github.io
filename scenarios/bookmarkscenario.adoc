@@ -1,0 +1,200 @@
+=== Bookmark and organize your documents
+____
+This scenario describes how to use the functionality of Bookmarks API and Folders API to organize your _documents_. +
+
+*Prerequisites*: to follow this scenario, ensure that you have at least one _permanent search_ (see the <<#Create-a-search,Create a _search_>> scenario). +
+
+*Expected results*:
+
+* Three necessary _documents_ are bookmarked.
+* *Bookmarks* are placed into a specially created _folder_.
+
+*Related topics*: <<general/overview.adoc#search-api,Search API>>, <<general/overview.adoc#bookmarks-api,Bookmarks API>>, <<general/overview.adoc#folders-api,Folders API>>
+____
+
+[float]
+==== 1. Find the unique IDs of documents
+
+Let's say that your "Exxon and Saudi Aramco" _search_ returned you some _documents_, three of which are interesting and important for you:
+
+* "5 Questions About The Aramco IPO That Really Matter To Investors" from Forbes.
+* "Big Profits Do Not Guarantee Stock Market Success For Aramco", also from Forbes.
+* "Saudi Aramco tells investors it's ready to go public" from CNBC. +
+All these _documents_ are used as an example.
+
+To proceed, you need the unique IDs of these _documents_.
+Run the `GET searches/{{search_uid}}/results` request with the following parameters:
+
+* `{{search_uid}}` is the unique ID of your "Exxon and Saudi Aramco" _search_. +
+See the <<#1-find-the-unique-id-of-a-search,Find the unique ID of a _search_>> part of the <<#subscribe-to-a-search,Subscribe to a _search_>> scenario.
+* Query parameter `show_options=documents` to view the results. +
+The request returns only the total count of _documents_ by default.
+The query parameter `show_options` includes the _documents_ into the response.
+* Query parameter `limit=50` to view the maximum available number of _documents_ per request. +
+The request returns only 10 _documents_ by default. Raising the `limit` query parameter increases the payload of the response.
+
+----
+curl --location --request GET 'https://{{API_link}}/searches/{{search_uid}}/results?show_options=documents&limit=50' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}'
+----
+.Click here for Search API response containing _documents_ in `search` results.
+[%collapsible]
+====
+The `"tags"` and `"sentiments"` arrays in the response are truncated, and some _documents_ are omitted for brevity.
+
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+----
+
+[source,json]
+----
+{
+    "documents": [
+        {...},
+        {
+            "category": "Business & Financial Publications",
+            "contributor": "Forbes",
+            "headline": "5 Questions About The Aramco IPO That Really Matter To Investors",
+            "id": "8411717664",
+            "image_uri": "https://specials-images.forbesimg.com/imageserve/42962293/0x600.jpg?fit=scale",
+            "published_at": "2019-09-03T19:51:24.12Z",
+            "sentiments": [...],
+            "source": "Forbes | Investing",
+            "summary": "The 5 things the world really needs to know about the Aramco IPO.",
+            "tags": [...],
+            "uri": "https://{{Discovery_Portal_base_address}}/searches/documents/8411717664",
+            "sharing_allowed": true
+        },
+        {...},
+        {
+            "category": "Business & Financial Publications",
+            "contributor": "Forbes",
+            "headline": "Big Profits Do Not Guarantee Stock Market Success For Aramco",
+            "id": "8322820665",
+            "image_uri": "https://specials-images.forbesimg.com/dam/imageserve/43346899/0x600.jpg?fit=scale",
+            "published_at": "2019-08-13T14:33:56.559Z",
+            "sentiments": [...],
+            "source": "Forbes | Energy News",
+            "summary": "Saudi Aramco grabbed headlines this week with the announcement of revenues of nearly $50 billion in the first half of the year. But those returns don't equal growth potential in an oversupplied market and traditional investors may want to think twice before jumping at an Aramco initial offering.",
+            "tags": [...],
+            "uri": "https://{{Discovery_Portal_base_address}}/searches/documents/8322820665",
+            "sharing_allowed": true
+        },
+        {...},
+        {
+            "category": "Major News Publications",
+            "contributor": "CNBC",
+            "headline": "Saudi Aramco tells investors it's ready to go public",
+            "id": "8321437666",
+            "published_at": "2019-08-12T16:25:22.479Z",
+            "sentiments": [...],
+            "source": "CNBC | Top Business Stories from the U.S.",
+            "summary": "Saudi Aramco's CFO said the company is ready for an initial public offering, but the timing will be up to its owner, the Kingdom of Saudi Arabia.",
+            "tags": [...],
+            "uri": "https://{{Discovery_Portal_base_address}}/searches/documents/8321437666",
+            "sharing_allowed": true
+        },
+        {...}
+    ],
+    "documents_total": 81
+}
+----
+====
+
+The unique IDs of the _documents_ are values of the `"id"` property (also the last path parameters of the `uri` property).
+The unique IDs are `8411717664`, `8322820665`, and `8321437666`.
+
+[float]
+==== 2. Bookmark your documents
+
+<<general/overview.adoc#bookmarks-api,Bookmarks API>> allows you to mark important _feeds_, _searches_, and _documents_ for faster access.
+
+To bookmark the _documents_, put their unique IDs in the path of the PUT request:
+----
+curl --location --request PUT 'https://{{API_link}}/bookmarks/documents/8411717664,8322820665,8321437666' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}'
+----
+The response returns the `201 Created` status code, which means that the request was successful.
+
+----
+HTTP/1.1 201 Created
+Content-Type: application/json
+----
+
+[float]
+==== 3. Create a folder for your bookmarks
+
+<<general/overview.adoc#folders-api,Folders API>> allows you to organize your _searches_, _newsletters_, and bookmarked _documents_ into customizable _folders_.
+
+To create a _folder_, run the following `POST folders/{{item_type}}` request:
+
+* Set the `{{item_type}}` path parameter to `bookmarks`.
+* Populate the `"items"` array with the unique IDs of your bookmarks.
+* Assign a value to the `"name"` parameter to give a name to your _folder_.
+
+----
+curl --location --request POST 'https://{{API_link}}/folders/bookmarks' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}' \
+--data-raw
+----
+[source,json]
+----
+'{
+    "items": [
+        "8411717664",
+        "8322820665",
+        "8321437666"
+    ],
+    "name": "Saudi Aramco IPO"
+}'
+----
+
+The response returns the `201 Created` status code, which means that the request was successful.
+
+----
+HTTP/1.1 201 Created
+Content-Type: application/json
+----
+
+Check the result of your POST request by running the following GET request:
+----
+curl --location --request GET 'https://{{API_link}}/folders/bookmarks' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}'
+----
+.Click here for Folders API response with a new _folder_.
+[%collapsible]
+====
+Note that InfoNgen automatically assigned an `"id"` and `"type"` to your _folder_.
+
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+----
+
+[source,json]
+----
+[
+    {
+        "id": "ac77b125-822b-4aa3-88ac-165a2613ca83",
+        "name": "Saudi Aramco IPO",
+        "items": [
+            "8411717639",
+            "8322820936",
+            "8321437765"
+        ],
+        "type": "personal"
+    }
+]
+----
+====
+
+*Results*:
+
+* Three _documents_ are bookmarked.
+* The bookmarked _documents_ are placed in a custom _folder_.

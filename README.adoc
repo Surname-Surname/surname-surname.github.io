@@ -1,0 +1,229 @@
+:doctype: book
+:sectlinks:
+:sectanchors:
+:sectids:
+:figure-caption: *Figure*
+:table-caption: *Table*
+:table-stripes: hover,none
+:toc: macro
+:toclevels: 3
+:toc-title!:
+:idprefix: infongen
+:xrefstyle: full
+:hide-uri-scheme:
+
+= InfoNgen API User Guide
+
+[float]
+== Table of Contents
+
+toc::[]
+
+== Introduction
+
+This guide is for developers looking to integrate advanced search capabilities, text analytics, and topic-based content delivery into existing products, or build new solutions with InfoNgen.
+
+This guide contains:
+
+* General information about InfoNgen and a high-level overview of its APIs.
+* An overview of the search functionality.
+* Information about InfoNgen API authentication.
+* A list of possible InfoNgen API errors, and the basic information on how to troubleshoot them.
+* Eight API usage scenarios.
+* Lists of InfoNgen APIs and their endpoints.
+* A glossary of terms.
+
+'''
+
+image:icons/mail.png[alt=Note icon, width="40", float="left"] We are happy to hear from you: submit your feedback and suggestions for improvements to mailto:helpdesk@infongen.com[InfoNgen Help Desk].
+
+== Document conventions
+
+* Double braces `{\{text}}` enclose a placeholder value that needs to be replaced with user-specific data in the request. +
+For example, `{\{access_token}}` is a placeholder for an authorization token.
+* All API request and response examples in the manual are https://curl.haxx.se[cURL] statements.
+* _Italicized text^?^_ with a superscript question mark next to it marks the first mention of an item from the <<#glossary,Glossary>>. +
+All subsequent instances of this Glossary item are then marked with _italicized text_ throughout this Guide.
+* *Bold* text introduces *Notes*, *Figures*, and *Tables*, and denotes *points of emphasis*, where appropriate.
+* Ellipses "..." mark truncation in code samples, figures, and text.
+`"{...}"` mark truncated JSON objects, `"[...]"` mark truncated JSON arrays.
+* Clickable expands with the text "Click here for ..." contain code samples, example requests, example responses, or additional information. +
++
+.Click here for more information.
+[%collapsible]
+
+====
+Additional information is displayed in the expandable section.
+====
+
+* image:icons/lightbulb.png[alt=Note icon, width="60"] "Lightbulb" icon is placed close to important notes.
+* image:icons/warning.png[alt=Warning icon, width="55"] "Warning" icon is placed close to crucial information or advice.
+* image:icons/section.png[alt=Section icon, width="30"] "Section" icon links to the beginning of a section.
+* image:icons/index.png[alt=Index icon, width="30"] "Table of Contents" icon links to the beginning of the User Guide.
+
+include::general/intro.adoc[<attrlist>]
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::general/overview.adoc[<attrlist>]
+
+== Developer information
+
+* <<devdata/authentication.adoc#authentication,Authentication>>
+* <<devdata/throttling.adoc#throttling-and-limiting-api-restrictions,Throttling and limiting. API restrictions>>
+* <<devdata/search.adoc#introduction-to-a-search,Introduction to a search>>
+* <<devdata/document.adoc#document-availability,Document availability>>
+* <<devdata/headers.adoc#request-and-response-headers,Document availability>>
+* <<devdata/admin.adoc#user-roles-and-administrative-privilege,User roles and administrative privilege>>
+* <<devdata/pagination.adoc#pagination,Pagination>>
+* <<devdata/version.adoc#semantic-version-and-changelog,Semantic version and Changelog>>
+* <<devdata/errors.adoc#errors-and-troubleshooting,Errors and troubleshooting>>
+
+include::devdata/authentication.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::devdata/throttling.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::devdata/search.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::devdata/document.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::devdata/headers.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::devdata/admin.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::devdata/pagination.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::devdata/version.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::devdata/errors.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+== Usage scenarios
+
+* <<#create-a-search,Create a _search_>>
+* <<#change-the-parameters-of-a-search,Change the parameters of a _search_>>
+* <<#create-a-contact-list,Create a _contact list_>>
+* <<#subscribe-to-a-search,Subscribe to a _search_>>
+* <<#bookmark-and-organize-your-documents,Bookmark and organize your _documents_>>
+* <<#create-and-publish-a-newsletter,Create and publish a _newsletter_>>
+
+include::scenarios/searchscenario.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
+
+image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
+
+include::scenarios/searchparamsscenario.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
+
+image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
+
+include::scenarios/contactlistscenario.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
+
+image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
+
+include::scenarios/subscriptionscenario.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
+
+image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
+
+include::scenarios/bookmarkscenario.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
+
+image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
+
+include::scenarios/newsletterscenario.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
+
+image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
+
+include::scenarios/emailfeedcreationscenario.adoc[<attrlist>]
+
+'''
+
+image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
+
+image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
+
+== Appendix
+
+include::general/endpoints.adoc[<attrlist>]
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+
+include::general/glossary.adoc[<attrlist>]
+
+'''
+
+image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>

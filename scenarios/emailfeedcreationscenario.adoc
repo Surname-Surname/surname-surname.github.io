@@ -1,0 +1,542 @@
+=== Create a private feed
+____
+This scenario describes how to use the functionality of Feeds API to create private _feeds_, the _documents_ of which can be used in _searches_.
+
+*Expected results*:
+
+* A private _feed_ is created.
+* You can submit _documents_ into it via email, or the InfoNgen Crawler has access to it.
+* Its _documents_ appear in _searches_.
+
+*Related topics*: <<general/overview.adoc#feeds-api,Feeds API>>, <<general/overview.adoc#search-api,Search API>>, <<general/overview.adoc#bookmarks-api,Bookmarks API>>
+____
+
+[float]
+==== 1. Create a private feed
+
+You can use Feeds API to create _feeds_ with different levels of access.
+_Feeds_ can be public—visible to everyone, or private—visible to select users and companies only, and _documents_ within the private _feeds_ can be restricted with additional levels of access.
+
+When creating a _feed_, the important settings to take into account are `"access_type"`, `"properties"`, and `"visibility"`.
+
+* `"access_type"` has two settings:
+** `"public"`—for _feeds_ where the _documents_ are publicly available and stored externally, for example, `https://`-type links.
+** `"private"`—for _feeds_ with limited access where the _documents_ are stored internally in InfoNgen storage. +
+* `"properties"` array must contain the objects that control the _feed_ properties.
+Based on the _feed_ type—email, DropBox, OneDrive, SharePoint, or PACER—the `"properties"` array will contain specific objects (see further the descriptions of properties necessary for OneDrive and SharePoint).
+* `"visibility"` can be set only for `"access_type": "private"`. +
+Objects inside `"visibility"` property control the access to the _feed_ and its _documents_.
+
+[float]
+===== 1a. Parameters for a private email feed
+
+To create a private email _feed_, run the following API request, where:
+
+* _Feed_ type is set as `"type": "EMAIL"`.
+* `"enabled": true` allows InfoNgen to process the _documents_ in the _feed_.
+* `"categories"` array contains necessary values:
+** `"43"` for Private Sources category.
+** `"34"` for Email Sources category. +
+To check the necessary category values, run the `GET reference/tags/{{tagname}}` method with `feed.category` as `{{tagname}}`.
+* The `"properties"` array contains four objects, which are mandatory for email _feed_ creation.
+One object contains a variable:
+** `{"group": "Web/EMail", "name": "Sender", "value": "{{Your_email_goes_here@example.com}}"}` must contain your email as the value in `"value"`.
+*** To allow emails from a specific domain, set `"@{{example.com}}"` as the value in `"value"`.
+*** To allow emails from anywhere, set `".*"` as the value in `"value"`.
+* The parameters in the `"visibility"` object effectively allow access to the feed to you only:
+** `"content_access": "protected"` and `"scope": "OWNER"` mean that the _documents_ in the _feed_ will only be visible to its owner (you).
+** `"entitled_users"` array holds your own unique _user_ ID so that you have access to the _feed_.
+** `"contributing_users"` array holds your own unique _user_ ID so that you can upload files into the _feed_ using the Feeds API. +
+`"contributing_users"` and `"entitled_users"` arrays with your _user_ ID are part of the <<#Upload-a-file-to-a-feed-through-API,Upload a file to a feed through API>> scenario.
+
+----
+curl --location --request POST 'https://{{API_link}}/feeds' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}' \
+--data-raw
+----
+[source,json]
+----
+'{
+    "name": "My private email feed",
+    "type": "EMAIL",
+    "enabled": true,
+    "access_type": "private",
+    "categories": [
+        "34",
+        "43"
+        ],
+    "properties": [
+        {
+            "group": "Info",
+            "name": "JobType",
+            "value": "Feed"
+        },
+        {
+            "group": "Common",
+            "name": "ShowUsingLocalCopyUri",
+            "value": "True"
+        },
+        {
+            "group": "Common",
+            "name": "DataType",
+            "value": "Web/EMail"
+        },
+        {
+            "group": "Web/EMail",
+            "name": "Sender",
+            "value": "{{Your_email_goes_here@example.com}}"
+        }
+    ],
+    "visibility": {
+        "content_access": "protected",
+        "scope": "OWNER",
+        "entitled_users": ["{{your_unique_user_ID}}"],
+        "contributing_users": ["{{your_unique_user_ID}}"]
+    }
+}'
+----
+Feeds API returns the following response, where the `Location` header contains the unique ID of the created _feed_.
+----
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /v2/feeds/{{your_feed_unique_ID}}
+----
+
+You can check that the _feed_ has been created successfully by running the following request, where the body contains the query condition to find your _feed_ by its name.
+
+----
+curl --location --request POST 'https://{{API_link}}/feeds/query' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}' \
+--data-raw
+----
+[source,json]
+----
+'{
+    "conditions": [
+        {
+            "name": "name",
+            "values": [
+                "My private email feed"
+            ]
+        }
+    ]
+}
+'
+----
+
+Feeds API returns the following response.
+
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+Location: /v2/feeds/{{your_feed_unique_ID}}
+----
+
+[source, json]
+----
+[
+    {
+        "uid": "{{your_feed_unique_ID}}",
+        "name": "My private email feed",
+        "created_at": "2021-07-29T09:04:40.745Z",
+        "creator": "{{your_unique_user_ID}}",
+        "updated_at": "2021-07-29T09:04:42.484Z",
+        "type": "EMail",
+        "enabled": true,
+        "categories": [
+            "34",
+            "48"
+        ],
+        "access_type": "Private",
+        "properties": [{...}]
+    }
+]
+----
+
+[float]
+===== 1b. Parameters for a private OneDrive feed
+
+Additional OneDrive properties must be automatically assessed by the InfoNgen Crawler app and written into internal configuration sections.
+To receive instructions on how to give the InfoNgen Crawler app access to your OneDrive, contact mailto:helpdesk@infongen.com[InfoNgen Help Desk].
+
+To create a private OneDrive _feed_, run the following API request, where:
+
+* _Feed_ name is `"name": "OneDrive | {{OneDrive_folder_name}}"`, where `{{OneDrive_folder_name}}` must contain the name of the OneDrive folder to which you will upload files.
+* _Feed_ type is set as `"type": "Custom"`.
+* `"enabled": true` allows InfoNgen to process the _documents_ in the _feed_.
+* `"categories"` array contains the value `"38"` for Cloud Storage category. +
+To check the necessary category values, run the `GET reference/tags/{{tagname}}` method with `feed.category` as `{{tagname}}`.
+* The `"properties"` array contains multiple objects, which are mandatory for OneDrive _feed_ creation.
+Those objects that contain variables are described here:
+** `{"group": "Feed","name": "Client","value": "{{client_id}}"}` specifies your own Client ID. +
+To view your Client ID, run the `GET profile` method and copy the value of the `"client_code"` property.
+** `{"group": "StorageClient","name": "Target","value": "OneDrive_folder_name"}` must match the name of the OneDrive folder that you set in _feed_ name.
+* The parameters in the `"visibility"` object effectively allow access to the feed to you only:
+** `"content_access": "protected"` and `"scope": "OWNER"` mean that the _documents_ in the _feed_ will only be visible to its owner (you).
+** `"entitled_users"` array holds your own unique _user_ ID so that you have access to the _feed_.
+** `"contributing_users"` array holds your own unique _user_ ID so that you can upload files into the _feed_ using the Feeds API. +
+`"contributing_users"` and `"entitled_users"` arrays with your _user_ ID are part of the <<#Upload-a-file-to-a-feed-through-API,Upload a file to a feed through API>> scenario.
+
+
+----
+curl --location --request POST 'https://{{API_link}}/feeds' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}' \
+--data-raw
+----
+[source,json]
+----
+'{
+    "name": "OneDrive | OneDrive_folder_name",
+    "type": "Custom",
+    "enabled": true,
+    "access_type": "private",
+    "categories": [
+        "38"
+        ],
+    "properties": [
+        {
+              "group": "Info",
+              "name": "JobType",
+              "value": "Feed"
+        },
+        {
+              "group": "Feed",
+              "name": "Client",
+              "value": "{client_id}"
+        },
+        {
+              "group": "Common",
+              "name": "ShowUsingLocalCopyUri",
+              "value": "False"},
+        {
+              "group": "Common",
+              "name": "DataType",
+              "value": "Web/FileStorage"
+        },
+        {
+              "group": "Tag",
+              "name": "AccessType",
+              "value": "Private"
+        },
+        {
+              "group": "StorageClient",
+              "name": "Provider",
+              "value": "Onedrive"
+        },
+        {
+              "group": "StorageClient",
+              "name": "Target",
+              "value": "OneDrive_folder_name"
+        }
+    ],
+    "visibility": {
+        "content_access": "protected",
+        "scope": "OWNER",
+        "entitled_users": ["{{your_unique_user_ID}}"],
+        "contributing_users": ["{{your_unique_user_ID}}"]
+    }
+}'
+----
+Feeds API returns the following response, where the `Location` header contains the unique ID of the created _feed_.
+----
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /v2/feeds/{{your_feed_unique_ID}}
+----
+
+[float]
+===== 1c. Parameters for a private SharePoint feed
+
+Additional SharePoint properties must be automatically assessed by the InfoNgen Crawler app and written into internal configuration sections.
+To receive instructions on how to give the InfoNgen Crawler app access to your SharePoint, contact mailto:helpdesk@infongen.com[InfoNgen Help Desk].
+
+To create a private SharePoint _feed_, run the following API request, where:
+
+* _Feed_ name is `"name": "SharePoint | {{SharePoint_folder_name}}"`, where `{{SharePoint_folder_name}}` must contain the name of the SharePoint folder to which you will upload files.
+* _Feed_ type is set as `"type": "Custom"`.
+* `"enabled": true` allows InfoNgen to process the _documents_ in the _feed_.
+* `"categories"` array contains the value `"38"` for Cloud Storage category. +
+To check the necessary category values, run the `GET reference/tags/{{tagname}}` method with `feed.category` as `{{tagname}}`.
+* The `"properties"` array contains multiple objects, which are mandatory for SharePoint _feed_ creation.
+Those objects that contain variables are described here:
+** `{"group": "Feed","name": "Client","value": "{client_id}"}` specifies your own Client ID.
+To view your Client ID, run the `GET profile` method and see the value of the `"client_code"` property.
+** `{"group": "Sharepoint","name": "Site","value": "{{your_SharePoint_site_address}}"}` must contain the address at which your SharePoint is located.
+** `{"group": "StorageClient","name": "Target","value": "{{SharePoint_folder_name}}"}` must match the name of the SharePoint folder that you set in _feed_ name.
+* The parameters in the `"visibility"` object effectively allow access to the feed to you only:
+** `"content_access": "protected"` and `"scope": "OWNER"` mean that the _documents_ in the _feed_ will only be visible to its owner (you).
+** `"entitled_users"` array holds your own unique _user_ ID so that you have access to the _feed_.
+** `"contributing_users"` array holds your own unique _user_ ID so that you can upload files into the _feed_ using the Feeds API. +
+`"contributing_users"` and `"entitled_users"` arrays with your _user_ ID are part of the <<#Upload-a-file-to-a-feed-through-API,Upload a file to a feed through API>> scenario.
+
+----
+curl --location --request POST 'https://{{API_link}}/feeds' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}' \
+--data-raw
+----
+[source,json]
+----
+'{
+    "name": "SharePoint | {{SharePoint_folder_name}}",
+    "type": "Custom",
+    "enabled": true,
+    "access_type": "private",
+    "categories": [
+        "38"
+        ],
+    "properties": [
+        {
+            "group": "Info",
+            "name": "JobType",
+            "value": "Feed"
+        },
+        {
+            "group": "Feed",
+            "name": "Client",
+            "value": "{client_id}"
+        },
+        {
+            "group": "Common",
+            "name": "ShowUsingLocalCopyUri",
+            "value": "False"
+        },
+        {
+            "group": "Common",
+            "name": "SkipHistory",
+            "value": "False"
+        },
+        {
+            "group": "Common",
+            "name": "DataType",
+            "value": "Web/FileStorage"
+        },
+        {
+            "group": "Common",
+            "name": "HashCodeComputationRule",
+            "value": "HeadlineSynopsisUniversal"
+        },
+        {
+            "group": "Sharepoint",
+            "name": "Site",
+            "value": "{{your_SharePoint_site_address}}"
+        },
+        {
+            "group": "Tag",
+            "name": "AccessType",
+            "value": "Private"
+        },
+        {
+            "group": "StorageClient",
+            "name": "Cursor"
+        },
+        {
+            "group": "StorageClient",
+            "name": "Provider",
+            "value": "Sharepoint",
+        {
+            "group": "StorageClient",
+            "name": "Target",
+            "value": "{SharePoint_folder_name}"
+        }
+    ],
+    "visibility": {
+        "content_access": "protected",
+        "scope": "OWNER",
+        "entitled_users": ["{{your_unique_user_ID}}"],
+        "contributing_users": ["{{your_unique_user_ID}}"]
+    }
+}'
+----
+Feeds API returns the following response, where the `Location` header contains the unique ID of the created _feed_.
+----
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /v2/feeds/{{your_feed_unique_ID}}
+----
+
+[float]
+==== 2. Upload documents into your feed
+
+Based on the type of the _feed_ from step 1, you may need to manually send an email to a special address, or upload _documents_ to a cloud storage.
+
+[float]
+===== 2a. Uploading documents into an email feed
+
+To upload a _document_ to your email _feed_, send it via email to the following address: mailto:NameOfYourFeed@appliance.infongen.com[{{NameOfYourFeed}}@appliance.infongen.com], where {{NameOfYourFeed}} must contain the name of the _feed_ you created (without spaces).
+
+You can put the information for processing directly into the body of your email, or add an attachment with the necessary _document_.
+
+'''
+
+image:icons/lightbulb.png[alt=Note icon, width="60", float="left"] The larger the attachment, the longer the processing.
+
+For emails with an empty body InfoNgen will generate summary automatically based on the attachment's content. +
+When you add your own body to the email, it is used as the document's summary.
+
+'''
+
+[float]
+===== 2b. Uploading documents into your Cloud Storages
+
+To upload a _document_ to your SharePoint or OneDrive _feeds_, place your _document_ into the folder that you set in `{{SharePoint_folder_name}}` or `{{OneDrive_folder_name}}` variables.
+Every time you upload a document to your cloud storage, the InfoNgen Crawler app sends it for processing.
+
+[float]
+==== 3. Retrieve the processed documents
+
+There are two ways to retrieve your files.
+You can bookmark the _feed_ and run the Bookmarks API request to pull the _documents_ that belong to your bookmarked _feed_.
+Alternatively, you can create a _search_ for _documents_ coming from that _feed_.
+
+[float]
+===== 3a. First approach via Bookmarks API
+
+You can view all the _documents_ in your _feed_ via Bookmarks API.
+To do that, first bookmark the _feed_.
+Use the unique ID of the created feed from step 1.
+
+----
+curl --location --request PUT 'https://{{API_link}}/bookmarks/feeds/{{your_unique_feed_uid}}' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}'
+----
+
+Bookmarks API responds with `201 Created` success message.
+
+After that, run the following GET method to retrieve all _documents_ available in the feed.
+
+----
+curl --location --request PUT 'https://{{API_link}}/bookmarks/feeds/{{your_unique_feed_uid}}/documents' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}'
+----
+
+Bookmarks API returns the following response, where each object inside the `"documents"` array is a processed _document_. +
+Each _document_ object contains the `"tags"` array populated by _tags_ that InfoNgen discovered in your _document_ that you submitted into the _feed_.
+
+[source, json]
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "documents": [
+        {
+            "category": "Email Sources",
+            "headline": "The headline of the document",
+            "id": "9774260482",
+            "published_at": "2021-07-29T14:00:51.953Z",
+            "source": "My private email feed",
+            "summary": "Your document's summary, automatically generated by InfoNgen",
+            "tags": [
+                {
+                "display_name": "Language",
+                "group_display_name": "Languages",
+                "name": "language",
+                "values": [
+                    {
+                        "display_value": "English",
+                        "value": "ENG"
+                    }
+                ]
+                },
+                {...}
+            ],
+            "uri": "https://{{API_link}}/searches/documents/{{your_document_unique_ID}}"
+        },
+        {...}
+    ],
+    "documents_total": 2
+}
+----
+
+[float]
+===== 3b. Second approach via Search API
+
+You can access the uploaded _documents_ via Search API.
+To do that, first create a _search_ with your _feed_ as its only source, and then run your _search_ when needed.
+
+To create a _search_ for the _feed documents_, run the following request, where:
+
+* `"conditions"` array contains the _tag_ `"main.job.code"` for _feeds_, with `"values"` array for that _tag_ holding the unique ID of the _feed_ you created.
+* `"search_settings"` object contains `"date_range": "Anytime"`, which means that your _search_ will return all _documents_ you ever sent for analysis.
+* The _search_ has the `search_name` query parameter, making it a _permanent search_ that you save to run at your convenience.
+
+----
+curl --location --request POST 'https://{{API_link}}/searches?search_name=My%20Feed%20Search' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: {{x-api-key}}' \
+--header 'Authorization: Bearer {{access_token}}' \
+--data-raw
+----
+[source,json]
+----
+'{
+    "conditions": [
+        {
+            "name": "main.job.code",
+            "values": [
+                "{{your_feed_unique_ID}}"
+            ]
+        }
+    ],
+    "search_settings": {
+        "date_range": "Anytime",
+    },
+    "show_options":[
+        "DOCUMENTS"
+    ]
+}'
+----
+
+The response contains the `"documents"` array with _documents_ that you've submitted.
+
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+----
+[source, json]
+----
+{
+    "documents": [
+        {
+            "category": "Email Sources",
+            "headline": "The headline of the document",
+            "id": "9774260482",
+            "published_at": "2021-07-29T14:00:51.953Z",
+            "source": "My private email feed",
+            "summary": "Your document's summary, automatically generated by InfoNgen",
+            "tags": [
+                {
+                "display_name": "Language",
+                "group_display_name": "Languages",
+                "name": "language",
+                "values": [
+                    {
+                        "display_value": "English",
+                        "value": "ENG"
+                    }
+                ]
+                },
+                {...}
+            ],
+            "uri": "https://{{API_link}}/searches/documents/{{your_document_unique_ID}}"
+        },
+        {...}
+    ],
+    "documents_total": 2
+}
+----
+
+*Results*:
+
+* The private *feed* of the necessary type is created successfully.
+* The _documents_ uploaded into that _feed_ appear tagged and visible in _searches_.
