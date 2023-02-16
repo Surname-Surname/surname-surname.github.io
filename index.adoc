@@ -1,3 +1,7 @@
+:toc: left
+:toclevels: 4
+:!toc-title:
+
 === Upload a file to a feed through API
 ____
 This scenario describes how to use the functionality of Feeds API to upload a file into a private _feed_ and retrieve the processed _file_ in a _search_.
@@ -14,7 +18,6 @@ This scenario is based on the result of the <<#Create-a-private-feed,Create a pr
 *Related topics*: <<general/overview.adoc#feeds-api,Feeds API>>, <<general/overview.adoc#search-api,Search API>>.
 ____
 
-[float]
 ==== 0. Check the feeds to which you can contribute
 
 After creating a _feed_, you must make sure that you can send documents into it.
@@ -49,7 +52,6 @@ X-Total: 1
 If the response returns zero _feeds_, create a _feed_ where you are a contributor.
 See the <<#Create-a-private-feed,Create a private feed>> scenario for reference.
 
-[float]
 ==== 1. Create a link for file upload
 
 Before you can upload a file into the InfoNgen storage, from where it will be processed, you must receive a link for file upload.
@@ -72,7 +74,6 @@ Location: https://files.infongen.com/uploads/{client_id}/{company_id}/{user_id}/
 This link is instrumental in the two following steps.
 After uploading a file, you can download the uploaded document using this link.
 
-[float]
 ==== 2. Send the file to the link
 
 Use the received link to upload the file into the InfoNgen storage.
@@ -103,7 +104,6 @@ The Feeds API returns the following response:
 HTTP/1.1 200 OK
 ----
 
-[float]
 ==== 3. Send the uploaded file into a feed
 
 After uploading the file to the link, you must append this file from the InfoNgen storage to a _feed_ for processing and tagging.
@@ -185,7 +185,6 @@ Content-Type: application/json
 }
 ----
 
-[float]
 ==== 4. Run a search for the uploaded file
 
 To find the tagged file, run the `POST searches` request to create a _search_.
