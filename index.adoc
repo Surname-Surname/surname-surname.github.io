@@ -1,3 +1,7 @@
+:toc: left
+:toclevels: 3
+:toc-title!:
+
 === Upload a file to a feed through API
 ____
 This scenario describes how to use the functionality of Feeds API to upload a file into a private _feed_ and retrieve the processed _file_ in a _search_.
