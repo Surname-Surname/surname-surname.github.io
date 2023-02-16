@@ -1,7 +1,3 @@
-:toc: left
-:toclevels: 4
-:toc-title!:
-
 === Upload a file to a feed through API
 ____
 This scenario describes how to use the functionality of Feeds API to upload a file into a private _feed_ and retrieve the processed _file_ in a _search_.
@@ -18,6 +14,7 @@ This scenario is based on the result of the <<#Create-a-private-feed,Create a pr
 *Related topics*: <<general/overview.adoc#feeds-api,Feeds API>>, <<general/overview.adoc#search-api,Search API>>.
 ____
 
+[float]
 ==== 0. Check the feeds to which you can contribute
 
 After creating a _feed_, you must make sure that you can send documents into it.
@@ -52,6 +49,7 @@ X-Total: 1
 If the response returns zero _feeds_, create a _feed_ where you are a contributor.
 See the <<#Create-a-private-feed,Create a private feed>> scenario for reference.
 
+[float]
 ==== 1. Create a link for file upload
 
 Before you can upload a file into the InfoNgen storage, from where it will be processed, you must receive a link for file upload.
@@ -74,6 +72,7 @@ Location: https://files.infongen.com/uploads/{client_id}/{company_id}/{user_id}/
 This link is instrumental in the two following steps.
 After uploading a file, you can download the uploaded document using this link.
 
+[float]
 ==== 2. Send the file to the link
 
 Use the received link to upload the file into the InfoNgen storage.
@@ -104,17 +103,18 @@ The Feeds API returns the following response:
 HTTP/1.1 200 OK
 ----
 
+[float]
 ==== 3. Send the uploaded file into a feed
 
 After uploading the file to the link, you must append this file from the InfoNgen storage to a _feed_ for processing and tagging.
 To do that, run the `POST feeds/{{your_feed_unique_ID}}/content` request with the following parameters:
 
-* `"title"` is a required property and will become the headline of the file you upload.
-* `"author"` is an optional property and becomes the author of the uploaded file.
-* `"date"` is an optional property and establishes the date and time of upload. +
-When this field is accessed by Search API, it becomes `"published_at"` there.
+* `"title"` is a required property that becomes the headline of the file you upload.
+* `"author"` is an optional property that becomes the author of the uploaded file.
+* `"date"` is an optional property that establishes the date and time of upload. +
+When this field is accessed by Search API, it becomes `"published_at"` in the *document* found by your *search*.
 * `"link"` contains the link from the API response in step 1.
-* `"summary"` is an optional property that contains the summary of the uploaded document.
+* `"summary"` is an optional property that contains the summary of the uploaded *document*  .
 * `"image_uri"` is an optional property to add an image to the uploaded file.
 * `"tags"` optional array contains the _tags_ that you can manually add to the uploaded document before its processing. +
 Added _tags_ must be taken from the Reference API.
@@ -141,7 +141,6 @@ Added _tags_ must be taken from the Reference API.
 ----
 
 If you leave only the required properties, the request is much shorter.
-
 
 .Click here for an example of a request with only required properties.
 [%collapsible]
@@ -186,13 +185,14 @@ Content-Type: application/json
 }
 ----
 
+[float]
 ==== 4. Run a search for the uploaded file
 
 To find the tagged file, run the `POST searches` request to create a _search_.
 You can use the following parameters:
 
 * `"conditions"` array must contain the conditions `"name": "main.job.code", "values": ["{your_feed_unique_ID}"]` object from the API response from step 3.
-* `"search_settings"` object may control the clustering and date range settings. +
+* `"search_settings"` object controls the clustering and date range settings. +
 In this example, `"clustering": "URI"` and `"date_range": "Anytime"` ensure that the _search_ returns all results from the _feed_.
 * `"show_options"` array contains the `["DOCUMENTS"]` value to immediately display the results.
 
