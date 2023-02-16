@@ -1,229 +1,262 @@
-:doctype: book
-:sectlinks:
-:sectanchors:
-:sectids:
-:figure-caption: *Figure*
-:table-caption: *Table*
-:table-stripes: hover,none
-:toc: macro
-:toclevels: 3
-:toc-title!:
-:idprefix: infongen
-:xrefstyle: full
-:hide-uri-scheme:
+=== Upload a file to a feed through API
+____
+This scenario describes how to use the functionality of Feeds API to upload a file into a private _feed_ and retrieve the processed _file_ in a _search_.
 
-= InfoNgen API User Guide
+*Prerequisites*: to follow this scenario, ensure that you have at least one _feed_ to which you can contribute (upload) your files.
+This scenario is based on the result of the <<#Create-a-private-feed,Create a private feed>> scenario.
+
+*Expected results*:
+
+* A file is uploaded into the InfoNgen storage.
+* The uploaded file is sent to a _feed_.
+* After processing, it appears in a _search_.
+
+*Related topics*: <<general/overview.adoc#feeds-api,Feeds API>>, <<general/overview.adoc#search-api,Search API>>.
+____
 
 [float]
-== Table of Contents
+==== 0. Check the feeds to which you can contribute
 
-toc::[]
+After creating a _feed_, you must make sure that you can send documents into it.
+This is achieved by placing your own unique _user_ ID into the _feed_'s `"contributing_users"` array.
 
-== Introduction
+To check that you have _feeds_ where you are allowed to upload, run the `GET feeds/contributions` request.
 
-This guide is for developers looking to integrate advanced search capabilities, text analytics, and topic-based content delivery into existing products, or build new solutions with InfoNgen.
+----
+curl -X GET {{API_link}}/feeds/contributions \
+-H 'Authorization:Bearer {{access_token}}' \
+-H 'x-api-key: {{API_key}}'
+----
 
-This guide contains:
+The Feeds API returns the following response:
 
-* General information about InfoNgen and a high-level overview of its APIs.
-* An overview of the search functionality.
-* Information about InfoNgen API authentication.
-* A list of possible InfoNgen API errors, and the basic information on how to troubleshoot them.
-* Eight API usage scenarios.
-* Lists of InfoNgen APIs and their endpoints.
-* A glossary of terms.
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Total: 1
+----
+
+[source, json]
+----
+[
+    {
+        "feed_uid": "{your_feed_unique_ID}",
+        "feed_name": "My private email feed"
+    }
+]
+----
+
+If the response returns zero _feeds_, create a _feed_ where you are a contributor.
+See the the <<#Create-a-private-feed,Create a private feed>> scenario for reference.
+
+[float]
+==== 1. Create a link for file upload
+
+Before you can upload a file into the InfoNgen storage, from where it will be processed, you must receive a link for file upload. To do that, run the `POST feeds/upload` request.
+
+----
+curl -X POST {{API_link}}/feeds/upload \
+-H 'Authorization:Bearer {{access_token}}' \
+-H 'x-api-key: {{API_key}}'
+----
+
+The Feeds API returns the following response with the `Location` header containing the necessary link:
+
+----
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: https://files.infongen.com/uploads/{client_id}/{company_id}/{user_id}/{link_properties}
+----
+
+This link is instrumental in the two following steps.
+After uploading a file, you can download the uploaded document using this link.
+
+[float]
+==== 2. Send the file to the link
+
+Use the received link to upload the file into the InfoNgen storage.
+To do that, send the file as an attachment to a PUT request, where the address of the PUT request is the link from step 1.
+
+*Requirements*:
+
+* You must specify the `Content-Disposition` header in your PUT request for the file to be processed correctly, and the request must contain the `filename` parameter.
+* This PUT request cannot carry any authorization.
+
+In this request, we are uploading a .txt file named "2022 prognosis".
 
 '''
 
-image:icons/mail.png[alt=Note icon, width="40", float="left"] We are happy to hear from you: submit your feedback and suggestions for improvements to mailto:helpdesk@infongen.com[InfoNgen Help Desk].
+image:icons/lightbulb.png[alt=Note icon, width="60", float="left"] To learn more about the `Content-Disposition` header, go to https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition[MDN Web Docs| Content-Disposition].
 
-== Document conventions
+'''
 
-* Double braces `{\{text}}` enclose a placeholder value that needs to be replaced with user-specific data in the request. +
-For example, `{\{access_token}}` is a placeholder for an authorization token.
-* All API request and response examples in the manual are https://curl.haxx.se[cURL] statements.
-* _Italicized text^?^_ with a superscript question mark next to it marks the first mention of an item from the <<#glossary,Glossary>>. +
-All subsequent instances of this Glossary item are then marked with _italicized text_ throughout this Guide.
-* *Bold* text introduces *Notes*, *Figures*, and *Tables*, and denotes *points of emphasis*, where appropriate.
-* Ellipses "..." mark truncation in code samples, figures, and text.
-`"{...}"` mark truncated JSON objects, `"[...]"` mark truncated JSON arrays.
-* Clickable expands with the text "Click here for ..." contain code samples, example requests, example responses, or additional information. +
-+
-.Click here for more information.
+----
+curl --location --request PUT 'https://files.infongen.com/uploads/{client_id}/{company_id}/{user_id}/{link_properties}' \
+--header 'Content-Disposition: attachment; filename="2022 prognosis.txt"' \
+--form '=@"/C:/Users/{{user}}/Desktop/2022 prognosis.txt"'
+----
+
+The Feeds API returns the following response:
+
+----
+HTTP/1.1 200 OK
+----
+
+[float]
+==== 3. Send the uploaded file into a feed
+
+After uploading the file to the link, you must append this file from the InfoNgen storage to a _feed_ for processing and tagging.
+To do that, run the `POST feeds/{{your_feed_unique_ID}}/content` request with the following parameters:
+
+* `"title"` is a required property and will become the headline of the file you upload.
+* `"author"` is an optional property and becomes the author of the uploaded file.
+* `"date"` is an optional property and establishes the date and time of upload. +
+When this field is accessed by Search API, it becomes `"published_at"` there.
+* `"link"` contains the link from the API response in step 1.
+* `"summary"` is an optional property that contains the summary of the uploaded document.
+* `"image_uri"` is an optional property to add an image to the uploaded file.
+* `"tags"` optional array contains the _tags_ that you can manually add to the uploaded document before its processing. +
+Added _tags_ must be taken from the Reference API.
+
+[source, json]
+----
+[
+    {
+        "title": "2022 Company Metrics",
+        "author": "Madison Liu",
+        "date": "2022-08-26T00:00:00Z",
+        "link": "https://files.infongen.com/uploads/{client_id}/{company_id}/{user_id}/{link_properties}",
+        "image_uri": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/1920px-Flag_of_the_United_States.svg.png",
+        "tags": [
+            {
+                "name": "country",
+                "values": [
+                    "US"
+                ]
+            }
+        ]
+    }
+]
+----
+
+If you leave only the required properties, the request is much shorter.
+
+
+.Click here for an example of a request with only required properties.
 [%collapsible]
-
-====
-Additional information is displayed in the expandable section.
 ====
 
-* image:icons/lightbulb.png[alt=Note icon, width="60"] "Lightbulb" icon is placed close to important notes.
-* image:icons/warning.png[alt=Warning icon, width="55"] "Warning" icon is placed close to crucial information or advice.
-* image:icons/section.png[alt=Section icon, width="30"] "Section" icon links to the beginning of a section.
-* image:icons/index.png[alt=Index icon, width="30"] "Table of Contents" icon links to the beginning of the User Guide.
-
-include::general/intro.adoc[<attrlist>]
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::general/overview.adoc[<attrlist>]
-
-== Developer information
-
-* <<devdata/authentication.adoc#authentication,Authentication>>
-* <<devdata/throttling.adoc#throttling-and-limiting-api-restrictions,Throttling and limiting. API restrictions>>
-* <<devdata/search.adoc#introduction-to-a-search,Introduction to a search>>
-* <<devdata/document.adoc#document-availability,Document availability>>
-* <<devdata/headers.adoc#request-and-response-headers,Document availability>>
-* <<devdata/admin.adoc#user-roles-and-administrative-privilege,User roles and administrative privilege>>
-* <<devdata/pagination.adoc#pagination,Pagination>>
-* <<devdata/version.adoc#semantic-version-and-changelog,Semantic version and Changelog>>
-* <<devdata/errors.adoc#errors-and-troubleshooting,Errors and troubleshooting>>
-
-include::devdata/authentication.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::devdata/throttling.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::devdata/search.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::devdata/document.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::devdata/headers.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::devdata/admin.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::devdata/pagination.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::devdata/version.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::devdata/errors.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Index icon, width="30"] <<#developer-information,Back to "Developer information" section>>
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-== Usage scenarios
-
-* <<#create-a-search,Create a _search_>>
-* <<#change-the-parameters-of-a-search,Change the parameters of a _search_>>
-* <<#create-a-contact-list,Create a _contact list_>>
-* <<#subscribe-to-a-search,Subscribe to a _search_>>
-* <<#bookmark-and-organize-your-documents,Bookmark and organize your _documents_>>
-* <<#create-and-publish-a-newsletter,Create and publish a _newsletter_>>
-
-include::scenarios/searchscenario.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
-
-image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
-
-include::scenarios/searchparamsscenario.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
-
-image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
-
-include::scenarios/contactlistscenario.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
-
-image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
-
-include::scenarios/subscriptionscenario.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
-
-image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
-
-include::scenarios/bookmarkscenario.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
-
-image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
-
-include::scenarios/newsletterscenario.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
-
-image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
-
-include::scenarios/emailfeedcreationscenario.adoc[<attrlist>]
-
-'''
-
-image:icons/section.png[alt=Section icon, width="30", float="left"] <<#usage-scenarios,Back to "Usage scenarios" section>>
-
-image:icons/index.png[alt=Index icon, width="30", float="left"] <<#table-of-contents,Back to Table of Contents>>
-
-== Appendix
-
-include::general/endpoints.adoc[<attrlist>]
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
-
-include::general/glossary.adoc[<attrlist>]
-
-'''
-
-image:icons/index.png[alt=Index icon, width="30"] <<#table-of-contents,Back to Table of Contents>>
+[source, json]
+----
+[
+    {
+        "title": "2022 Company Metrics",
+        "link": "https://files.infongen.com/uploads/{client_id}/{company_id}/{user_id}/{link_properties}",
+    }
+]
+----
+
+====
+
+Feeds API returns the following response:
+
+----
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+----
+
+[source, json]
+----
+{
+    "conditions": [
+        {
+            "name": "main.job.code",
+            "values": [
+                "{your_feed_unique_ID}"
+            ]
+        },
+        {
+            "name": "label",
+            "values": [
+                "{label}"
+            ]
+        }
+    ]
+}
+----
+
+[float]
+==== 4. Run a search for the uploaded file
+
+To find the tagged file, run the `POST searches` request to create a _search_.
+You can use the following parameters:
+
+* `"conditions"` array must contain the conditions `"name": "main.job.code", "values": ["{your_feed_unique_ID}"]` object from the API response from step 3.
+* `"search_settings"` object may control the clustering and date range settings. +
+In this example, `"clustering": "URI"` and `"date_range": "Anytime"` ensure that the _search_ returns all results from the _feed_.
+* `"show_options"` array contains the `["DOCUMENTS"]` value to immediately display the results.
+
+[source,json]
+----
+curl -X POST \ {{API_link}}/searches \
+  -H 'Authorization: Bearer {{access_token}}' \
+  -H 'x-api-key: {{API_key}}'\
+  -H 'Content-Type: application/json' \
+  -d
+'{
+    "conditions": [
+        {
+            "name": "main.job.code",
+            "values": [
+                "{your_feed_unique_ID}"
+            ]
+        }
+    ],
+    "search_settings": {
+        "clustering": "URI",
+        "date_range": "Anytime",
+    },
+    "show_options": [
+        "DOCUMENTS"
+    ]
+}'
+----
+
+Search API redirects to the following response:
+
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+----
+
+[source, json]
+----
+{
+    "documents": [
+        {
+            "category": "Email Sources",
+            "headline": "2022 Company Metrics",
+            "id": "{document_id}",
+            "image_uri": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/1920px-Flag_of_the_United_States.svg.png",
+            "published_at": "2022-08-26T00:00:00Z",
+            "source": "My private email feed",
+            "summary": "The Conference Board forecasts that economic weakness will intensify and spread more broadly throughout the US economy in the second half of 2022, and expects a recession to begin before the end of the year. This outlook is associated with persistent inflation and rising hawkishness by the Federal Reserve. ",
+            "tags": [...],
+            "uri": "https://igen-api.infongen.com/v2/searches/documents/{document_id}",
+            "main.size": [
+                "2564"
+            ],
+            "main.custom.attachment.filename": [
+                "2022 prognosis.txt"
+            ]
+        }
+    ],
+    "documents_total": 1
+}
+----
+
+The returned file contains the following:
+
+* `"tags"` array with all discovered _tags_.
+* `"summary"` parameter filled with InfoNgen-generated _document_ summary.
+* `"id"` parameter, using which you can return the _document_ from InfoNgen, bookmark the _document_, and perform other operations with it.
