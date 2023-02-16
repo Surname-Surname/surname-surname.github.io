@@ -47,7 +47,7 @@ X-Total: 1
 ----
 
 If the response returns zero _feeds_, create a _feed_ where you are a contributor.
-See the the <<#Create-a-private-feed,Create a private feed>> scenario for reference.
+See the <<#Create-a-private-feed,Create a private feed>> scenario for reference.
 
 [float]
 ==== 1. Create a link for file upload
