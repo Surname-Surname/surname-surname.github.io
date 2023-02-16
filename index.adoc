@@ -52,7 +52,8 @@ See the <<#Create-a-private-feed,Create a private feed>> scenario for reference.
 [float]
 ==== 1. Create a link for file upload
 
-Before you can upload a file into the InfoNgen storage, from where it will be processed, you must receive a link for file upload. To do that, run the `POST feeds/upload` request.
+Before you can upload a file into the InfoNgen storage, from where it will be processed, you must receive a link for file upload.
+To do that, run the `POST feeds/upload` request.
 
 ----
 curl -X POST {{API_link}}/feeds/upload \
