@@ -112,9 +112,9 @@ To do that, run the `POST feeds/{{your_feed_unique_ID}}/content` request with th
 * `"title"` is a required property that becomes the headline of the file you upload.
 * `"author"` is an optional property that becomes the author of the uploaded file.
 * `"date"` is an optional property that establishes the date and time of upload. +
-When this field is accessed by Search API, it becomes `"published_at"` in the *document* found by your *search*.
+When this field is accessed by Search API, it becomes `"published_at"` in the _document_ found by your _search_.
 * `"link"` contains the link from the API response in step 1.
-* `"summary"` is an optional property that contains the summary of the uploaded *document*  .
+* `"summary"` is an optional property that contains the summary of the uploaded _document_.
 * `"image_uri"` is an optional property to add an image to the uploaded file.
 * `"tags"` optional array contains the _tags_ that you can manually add to the uploaded document before its processing. +
 Added _tags_ must be taken from the Reference API.
