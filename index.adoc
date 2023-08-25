@@ -76,12 +76,12 @@ After uploading a file, you can download the uploaded document using this link.
 ==== 3. Send the file to the link
 
 Use the received link to upload the file into the InfoNgen storage.
-To do that, send the file as an attachment to a PUT request, where the address of the PUT request is the link from step 1.
+To do that, send the file as an attachment to a `PUT` request, where the address of the `PUT` request is the link from step 1.
 
 *Requirements*:
 
-* You must specify the `Content-Disposition` header in your PUT request for the file to be processed correctly, and the request must contain the `filename` parameter.
-* This PUT request cannot carry any authorization.
+* You must specify the `Content-Disposition` header in your `PUT` request for the file to be processed correctly, and the request must contain the `filename` parameter.
+* This `PUT` request cannot carry any authorization.
 
 In this request, we are uploading a .txt file named "2022 prognosis".
 
