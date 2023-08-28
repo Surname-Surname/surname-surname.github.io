@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.18">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>Upload a file to a feed through API</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -208,13 +208,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -393,7 +390,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -443,11 +440,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#_upload_a_file_to_a_feed_through_api">Upload a file to a feed through API</a>
 <ul class="sectlevel3">
-<li><a href="#_0_check_the_feeds_to_which_you_can_contribute">0. Check the feeds to which you can contribute</a></li>
-<li><a href="#_1_create_a_link_for_file_upload">1. Create a link for file upload</a></li>
-<li><a href="#_2_send_the_file_to_the_link">2. Send the file to the link</a></li>
-<li><a href="#_3_send_the_uploaded_file_into_a_feed">3. Send the uploaded file into a feed</a></li>
-<li><a href="#_4_run_a_search_for_the_uploaded_file">4. Run a search for the uploaded file</a></li>
+<li><a href="#_1_check_the_feeds_to_which_you_can_contribute">1. Check the feeds to which you can contribute</a></li>
+<li><a href="#_2_create_a_link_for_file_upload">2. Create a link for file upload</a></li>
+<li><a href="#_3_send_the_file_to_the_link">3. Send the file to the link</a></li>
+<li><a href="#_4_send_the_uploaded_file_into_a_feed">4. Send the uploaded file into a feed</a></li>
+<li><a href="#_5_run_a_search_for_the_uploaded_file">5. Run a search for the uploaded file</a></li>
 </ul>
 </li>
 </ul>
@@ -462,8 +459,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>This scenario describes how to use the functionality of Feeds API to upload a file into a private <em>feed</em> and retrieve the processed <em>file</em> in a <em>search</em>.</p>
 </div>
 <div class="paragraph">
-<p><strong>Prerequisites</strong>: to follow this scenario, ensure that you have at least one <em>feed</em> to which you can contribute (upload) your files.
-This scenario is based on the result of the <a href="#Create-a-private-feed">Create a private feed</a> scenario.</p>
+<p><strong>Prerequisites</strong>: you must be able to contribute to a private <em>feed</em> (this scenario is based on the result of the <a href="#Create-a-private-feed">Create a private feed</a> scenario).</p>
 </div>
 <div class="paragraph">
 <p><strong>Expected results</strong>:</p>
@@ -487,7 +483,7 @@ This scenario is based on the result of the <a href="#Create-a-private-feed">Cre
 </blockquote>
 </div>
 <div class="sect3">
-<h4 id="_0_check_the_feeds_to_which_you_can_contribute">0. Check the feeds to which you can contribute</h4>
+<h4 id="_1_check_the_feeds_to_which_you_can_contribute">1. Check the feeds to which you can contribute</h4>
 <div class="paragraph">
 <p>After creating a <em>feed</em>, you must make sure that you can send documents into it.
 This is achieved by placing your own unique <em>user</em> ID into the <em>feed</em>'s <code>"contributing_users"</code> array.</p>
@@ -528,7 +524,7 @@ See the <a href="#Create-a-private-feed">Create a private feed</a> scenario for 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_1_create_a_link_for_file_upload">1. Create a link for file upload</h4>
+<h4 id="_2_create_a_link_for_file_upload">2. Create a link for file upload</h4>
 <div class="paragraph">
 <p>Before you can upload a file into the InfoNgen storage, from where it will be processed, you must receive a link for file upload.
 To do that, run the <code>POST feeds/upload</code> request.</p>
@@ -556,10 +552,10 @@ After uploading a file, you can download the uploaded document using this link.<
 </div>
 </div>
 <div class="sect3">
-<h4 id="_2_send_the_file_to_the_link">2. Send the file to the link</h4>
+<h4 id="_3_send_the_file_to_the_link">3. Send the file to the link</h4>
 <div class="paragraph">
 <p>Use the received link to upload the file into the InfoNgen storage.
-To do that, send the file as an attachment to a PUT request, where the address of the PUT request is the link from step 1.</p>
+To do that, send the file as an attachment to a <code>PUT</code> request, where the address of the <code>PUT</code> request is the link from step 1.</p>
 </div>
 <div class="paragraph">
 <p><strong>Requirements</strong>:</p>
@@ -567,10 +563,10 @@ To do that, send the file as an attachment to a PUT request, where the address o
 <div class="ulist">
 <ul>
 <li>
-<p>You must specify the <code>Content-Disposition</code> header in your PUT request for the file to be processed correctly, and the request must contain the <code>filename</code> parameter.</p>
+<p>You must specify the <code>Content-Disposition</code> header in your <code>PUT</code> request for the file to be processed correctly, and the request must contain the <code>filename</code> parameter.</p>
 </li>
 <li>
-<p>This PUT request cannot carry any authorization.</p>
+<p>This <code>PUT</code> request cannot carry any authorization.</p>
 </li>
 </ul>
 </div>
@@ -599,7 +595,7 @@ To do that, send the file as an attachment to a PUT request, where the address o
 </div>
 </div>
 <div class="sect3">
-<h4 id="_3_send_the_uploaded_file_into_a_feed">3. Send the uploaded file into a feed</h4>
+<h4 id="_4_send_the_uploaded_file_into_a_feed">4. Send the uploaded file into a feed</h4>
 <div class="paragraph">
 <p>After uploading the file to the link, you must append this file from the InfoNgen storage to a <em>feed</em> for processing and tagging.
 To do that, run the <code>POST feeds/{{your_feed_unique_ID}}/content</code> request with the following parameters:</p>
@@ -701,7 +697,7 @@ Content-Type: application/json</pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_4_run_a_search_for_the_uploaded_file">4. Run a search for the uploaded file</h4>
+<h4 id="_5_run_a_search_for_the_uploaded_file">5. Run a search for the uploaded file</h4>
 <div class="paragraph">
 <p>To find the tagged file, run the <code>POST searches</code> request to create a <em>search</em>.
 You can use the following parameters:</p>
@@ -802,7 +798,7 @@ Content-Type: application/json</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-16 13:29:51 +0300
+Last updated 2023-08-25 11:55:15 +0300
 </div>
 </div>
 </body>
