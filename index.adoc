@@ -194,14 +194,16 @@ You can use the following parameters:
 In this example, `"clustering": "URI"` and `"date_range": "Anytime"` ensure that the _search_ returns all results from the _feed_.
 * `"show_options"` array contains the `["DOCUMENTS"]` value to immediately display the results.
 
+----
+POST {{API_link}}/searches
+Authorization: Bearer {{access_token}}
+x-api-key: {{API_key}}
+Content-Type: application/json
+----
+
 [source,json]
 ----
-curl -X POST \ {{API_link}}/searches \
-  -H 'Authorization: Bearer {{access_token}}' \
-  -H 'x-api-key: {{API_key}}'\
-  -H 'Content-Type: application/json' \
-  -d
-'{
+{
     "conditions": [
         {
             "name": "main.job.code",
@@ -217,7 +219,7 @@ curl -X POST \ {{API_link}}/searches \
     "show_options": [
         "DOCUMENTS"
     ]
-}'
+}
 ----
 
 Search API redirects to the following response:
